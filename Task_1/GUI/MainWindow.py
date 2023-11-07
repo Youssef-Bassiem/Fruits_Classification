@@ -63,7 +63,7 @@ class MainWindow(Ui_MainWindow):
         y = np.linspace(0,
                         max(data1[self.comboBox_2.currentText()].max(), data2[self.comboBox_2.currentText()].max()),
                         10)
-        x = (weights[2] * y + weights[0]) / (-1 * weights[1])
+        x = ((weights[2] * y) + weights[0]) / (-1 * weights[1])
         self.graph_axis.plot(x, y, color='red')
         self.graph_axis.grid(True)
         self.graph.draw()

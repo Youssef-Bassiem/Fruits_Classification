@@ -32,7 +32,7 @@ def train_model(w, data, xi):
     for _ in range(epochs):
         for j in range(0, data.shape[0]):
             for k in range(1, len(features)):
-                xi[k] = 0 if math.isnan(data.loc[j, features[k]]) else data.loc[j, features[k]]
+                xi[k] = 0 if (data.loc[j, features[k]].mean()) else data.loc[j, features[k]]
             y_hat = signum(np.dot(xi.reshape(1, -1), w.reshape(-1, 1)))
             if y_hat != data.iloc[j, 0]:
                 error = (data.iloc[j, 0] - y_hat)
@@ -74,7 +74,7 @@ def normalize(data):
 
 
 def main():
-    df = pd.read_excel("/media/abdalla/Study/FCIS 2024/Semester 7 FCIS 2024/Neural Networks & Deep Learning/Tasks/Neural-Networks/Task_1/Dry_Bean_Dataset.xlsx")
+    df = pd.read_excel("../Dry_Bean_Dataset.xlsx")
     # df = pd.read_excel('Task_1/Perceptron_Algorithm/Dry_Bean_Dataset.xlsx')
     startOfC1 = C1 * trainSamples
     dataOfC1 = split_data(startOfC1, df)
