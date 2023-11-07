@@ -53,17 +53,31 @@ def test_model(w, y, test_data, xi):
     return correct
 
 
+def normalize(data):
+    minVal = data.min().iloc[1:data.shape[0]].min()
+    maxVal = data.max().iloc[1:data.shape[0]].max()
+    # for i in range(0, data.shape[0]):
+    #     for j in range(1, len(features)):
+    #         # print(data.min()[features[j]])
+    #         data.iloc[i, j] = (data.iloc[i, j] - data.min()[features[j]]) / data.max()[features[j]] - data.min()[features[j]]
+    
+    # print(data.iloc[0:data.shape[0], 1:])
+    data.iloc[0:data.shape[0], 1:] = (data.iloc[0:data.shape[0], 1:] - minVal) / (maxVal - minVal)
+    print(data)
+    # print(data.min().iloc[1:data.shape[0]].min())
+
+
 def main():
     df = pd.read_excel("/media/abdalla/Study/FCIS 2024/Semester 7 FCIS 2024/Neural Networks & Deep Learning/Tasks/Neural-Networks/Task_1/Dry_Bean_Dataset.xlsx")
 
     startOfC1 = C1 * trainSamples
     dataOfC1 = split_data(startOfC1, df)
-    # print(dataOfC1)
+    normalize(dataOfC1)
     samplesOfC1 = dataOfC1.loc[0: trainSamples - 1, features]
 
     startOfC2 = C2 * trainSamples
     dataOfC2 = split_data(startOfC2, df)
-    # print(dataOfC2)
+    normalize(dataOfC2)
     samplesOfC2 = dataOfC2.loc[0: trainSamples - 1, features]
 
     samplesOfC1[samplesOfC1.columns[0]] = np.ones(samplesOfC1.shape[0])
@@ -82,6 +96,7 @@ def main():
     print(weights)
     print("Correct: ", test_model(w=weights, y=samplesOfC1.iloc[0, 0], test_data=dataOfC1, xi=xi), "From", testSamples)
     print("Correct: ", test_model(w=weights, y=samplesOfC2.iloc[0, 0], test_data=dataOfC2, xi=xi), "From", testSamples)
+    return dataOfC1, dataOfC2, weights
 
 
 

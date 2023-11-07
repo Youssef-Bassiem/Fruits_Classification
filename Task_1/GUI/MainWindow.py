@@ -63,16 +63,19 @@ class MainWindow(Ui_MainWindow):
             main.flagOfBias = True
 
         main.features = self.features
-        print(main.features)
+        # print(main.features)
         main.epochs = self.epochs_spinBox.value()
         main.L = self.learningRate_spingBox.value()
 
-        main.main()
-
+        data1, data2, weights = main.main()
+        p1 = -1*weights[0] / weights[2]
+        p2 = -1*weights[0] / weights[1]
+        # print(p1, p2)
         self.graph_axis.clear()
         self.graph.draw()
-        self.graph_axis.scatter([0, 1, 2], [0, 1, 2])
-        self.graph_axis.scatter([2, 2, 3], [1, 1, 2])
+        self.graph_axis.scatter(data1[self.features[1]], data1[self.features[2]])
+        self.graph_axis.scatter(data2[self.features[1]], data2[self.features[2]])
+        self.graph_axis.plot([0,p1], [p2,0])
         # self.graph_axis.grid(True)
         self.graph.draw()
 
