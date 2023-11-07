@@ -1,6 +1,9 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import math
+
+from sklearn import preprocessing
 
 samples = 50
 trainSamples = 30
@@ -56,28 +59,44 @@ def test_model(w, y, test_data, xi):
 def normalize(data):
     minVal = data.min().iloc[1:data.shape[0]].min()
     maxVal = data.max().iloc[1:data.shape[0]].max()
-    # for i in range(0, data.shape[0]):
-    #     for j in range(1, len(features)):
-    #         # print(data.min()[features[j]])
-    #         data.iloc[i, j] = (data.iloc[i, j] - data.min()[features[j]]) / data.max()[features[j]] - data.min()[features[j]]
-    
-    # print(data.iloc[0:data.shape[0], 1:])
-    data.iloc[0:data.shape[0], 1:] = (data.iloc[0:data.shape[0], 1:] - minVal) / (maxVal - minVal)
-    print(data)
-    # print(data.min().iloc[1:data.shape[0]].min())
+    # for f in range(1 ,len(features)):
+    #     for i in range(0, len(data[features[f]])):
+    #         data[features[f]][i] = (data[features[f]][i] - data[features[f]].min()) / (data[features[f]].max() - data[features[f]].min())
+    print(data[['Area','Perimeter']])
+    cols = data.columns
+    x = data.values  # returns a numpy array
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x)
+    df = pd.DataFrame(x_scaled)
+    df.columns = cols
+    return df
+    # data.iloc[0:data.shape[0], 1:] = (data.iloc[0:data.shape[0], 1:] - minVal) / (maxVal - minVal)
 
 
 def main():
     df = pd.read_excel("/media/abdalla/Study/FCIS 2024/Semester 7 FCIS 2024/Neural Networks & Deep Learning/Tasks/Neural-Networks/Task_1/Dry_Bean_Dataset.xlsx")
-
+    # df = pd.read_excel('Task_1/Perceptron_Algorithm/Dry_Bean_Dataset.xlsx')
     startOfC1 = C1 * trainSamples
     dataOfC1 = split_data(startOfC1, df)
-    normalize(dataOfC1)
+    c1_class = dataOfC1['Class']
+    dataOfC1.drop(['Class'], axis = 1, inplace = True)
+    # dataOfC1 = normalize(dataOfC1)
+    dataOfC1.insert(0, 'Class', c1_class.tolist())
+
     samplesOfC1 = dataOfC1.loc[0: trainSamples - 1, features]
 
     startOfC2 = C2 * trainSamples
     dataOfC2 = split_data(startOfC2, df)
-    normalize(dataOfC2)
+    c2_class = dataOfC2['Class']
+    dataOfC2.drop(['Class'], axis = 1, inplace = True)
+    # dataOfC2 = normalize(dataOfC2)
+    dataOfC2.insert(0, 'Class', c2_class.tolist())
+
+    # plt.scatter(dataOfC1['Area'], dataOfC1['Perimeter'])
+    # plt.scatter(dataOfC2['Area'], dataOfC2['Perimeter'])
+    # plt.show()
+
+
     samplesOfC2 = dataOfC2.loc[0: trainSamples - 1, features]
 
     samplesOfC1[samplesOfC1.columns[0]] = np.ones(samplesOfC1.shape[0])
