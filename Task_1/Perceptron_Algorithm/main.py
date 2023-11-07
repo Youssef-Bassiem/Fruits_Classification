@@ -25,7 +25,7 @@ def signum(value):
     return 1 if value >= 0 else -1
 
 
-def train_model(w):
+def train_model(w, data, xi):
     for _ in range(epochs):
         for j in range(0, data.shape[0]):
             for k in range(1, len(features)):
@@ -37,7 +37,7 @@ def train_model(w):
     return w
 
 
-def test_model(w, y, test_data):
+def test_model(w, y, test_data, xi):
     incorrect = 0
     correct = 0
 
@@ -53,15 +53,17 @@ def test_model(w, y, test_data):
     return correct
 
 
-if __name__ == '__main__':
-    df = pd.read_excel("Dry_Bean_Dataset.xlsx")
+def main():
+    df = pd.read_excel("/media/abdalla/Study/FCIS 2024/Semester 7 FCIS 2024/Neural Networks & Deep Learning/Tasks/Neural-Networks/Task_1/Dry_Bean_Dataset.xlsx")
 
     startOfC1 = C1 * trainSamples
     dataOfC1 = split_data(startOfC1, df)
+    # print(dataOfC1)
     samplesOfC1 = dataOfC1.loc[0: trainSamples - 1, features]
 
     startOfC2 = C2 * trainSamples
     dataOfC2 = split_data(startOfC2, df)
+    # print(dataOfC2)
     samplesOfC2 = dataOfC2.loc[0: trainSamples - 1, features]
 
     samplesOfC1[samplesOfC1.columns[0]] = np.ones(samplesOfC1.shape[0])
@@ -76,7 +78,12 @@ if __name__ == '__main__':
     weights = np.zeros(len(features))
     for i in range(0, len(weights)):
         weights[i] = np.random.rand()
-    weights = train_model(weights)
+    weights = train_model(weights, data, xi)
     print(weights)
-    print("Correct: ", test_model(w=weights, y=samplesOfC1.iloc[0, 0], test_data=dataOfC1), "From", testSamples)
-    print("Correct: ", test_model(w=weights, y=samplesOfC2.iloc[0, 0], test_data=dataOfC2), "From", testSamples)
+    print("Correct: ", test_model(w=weights, y=samplesOfC1.iloc[0, 0], test_data=dataOfC1, xi=xi), "From", testSamples)
+    print("Correct: ", test_model(w=weights, y=samplesOfC2.iloc[0, 0], test_data=dataOfC2, xi=xi), "From", testSamples)
+
+
+
+if __name__ == "__main__":
+    main()

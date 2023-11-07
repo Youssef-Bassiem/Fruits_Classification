@@ -69,7 +69,7 @@ def test_model(w, y, test_data):
 
 
 if __name__ == '__main__':
-    df = pd.read_excel("Dry_Bean_Dataset.xlsx")
+    df = pd.read_excel("/media/abdalla/Study/FCIS 2024/Semester 7 FCIS 2024/Neural Networks & Deep Learning/Tasks/Neural-Networks/Task_1/Dry_Bean_Dataset.xlsx")
 
     startOfC1 = C1 * trainSamples
     dataOfC1 = split_data(startOfC1, df)

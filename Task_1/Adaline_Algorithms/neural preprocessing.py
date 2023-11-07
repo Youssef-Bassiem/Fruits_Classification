@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder,MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 
-data =pd.read_csv("Dry_Bean_Dataset.csv")
+data =pd.read_csv("/media/abdalla/Study/FCIS 2024/Semester 7 FCIS 2024/Neural Networks & Deep Learning/Tasks/Neural-Networks/Task_1/Dry_Bean_Dataset.xlsx")
 
 print("-------------------------")
 
