@@ -28,18 +28,54 @@ def signum(value):
 
 
 def train_model(w, data, xi):
+    errors=0
     while True:
-        total_error = 0
         for j in range(0, data.shape[0]):
             for k in range(1, len(features)):
                 xi[k] = 0 if (data.loc[j, features[k]].mean()) else data.loc[j, features[k]]
-            y_hat = np.dot(xi.reshape(1, -1), w.reshape(-1, 1))
+            y_hat = np.dot(w.reshape(1, -1),xi.reshape(-1, 1))
+         #   print("-----------x-------------")
+         #   print(xi.reshape(-1,1))
+            
+          #  print("------------w------------")
+          #  print(w.reshape(1,-1))
+           # print("------------y_hat[0]------------")
+           # print(y_hat[0])
+           # print("---------y_hat---------------")
+           # print(y_hat)
+           # print("----------y--------")
+          #  print(data.iloc[j, 0])
+          #  print("------------------------")
             if y_hat[0] != data.iloc[j, 0]:
                 error = (data.iloc[j, 0] - y_hat[0])
-                w += L * error * xi
-                total_error += (data.iloc[j, 0] - y_hat[0]) ** 2
-        mse = (1 / 2) * (total_error / data.shape[0])
-        if mse <= threshold:
+               
+                w = w.reshape(-1,1) + L * error * xi.reshape(-1,1)
+           #     print("--------wnew----------------")
+           #     print(w)
+            #    print("------------------------")
+        for e in range(0, data.shape[0]):
+            for c in range(1, len(features)):
+                xi[k] = 0 if (data.loc[j, features[k]].mean()) else data.loc[j, features[k]]
+            y_hat = np.dot(w.reshape(1, -1),xi.reshape(-1, 1))
+            print("-----------xi2-------------")
+            print(xi.reshape(-1,1))
+            
+            print("------------wi2------------")
+            print(w.reshape(1,-1))
+            print("------------y_hat[0]-i2-----------")
+            print(y_hat[0])
+            print("---------y_hat------i2---------")
+            print(y_hat)
+            print("----------y-i2-------")
+            print(data.iloc[e, 0])
+            print("------------------------")
+            if y_hat != data.iloc[e, 0]:
+                errors += (((data.iloc[e, 0] - y_hat)**2)/2)
+        mses=(1/(data.shape[0])*(errors))
+        print("----------mse------------")
+        print(mses)
+        print("------------------------")
+        if(mses<=threshold):
             break
     return w
 
@@ -77,7 +113,7 @@ def normalize(data):
 
 
 def main():
-    df = pd.read_excel("../Dry_Bean_Dataset.xlsx")
+    df = pd.read_csv("Dry_Bean_Dataset.csv")
     # df = pd.read_excel('Task_1/Perceptron_Algorithm/Dry_Bean_Dataset.xlsx')
     startOfC1 = C1 * trainSamples
     dataOfC1 = split_data(startOfC1, df)
