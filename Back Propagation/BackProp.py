@@ -5,21 +5,15 @@ inputs = 2
 layers_count = 1
 neurons_num = [2]
 output_neurons = 1
-bias_flag = False
+bias_flag = True
 eta = 0.1
-threshold = 0.0001
-# 1 1 -> 0
-# 1 0 -> 1
-# 0 1 -> 1
+threshold = 0.001
 x = [
     np.array([[0, 0]]),
     np.array([[1, 1]]),
     np.array([[1, 0]]),
     np.array([[0, 1]])
 ]
-# 0 0 -> 0
-# x[0] = np.append(x[0], 1)
-# print(x)
 y = np.array([[0, 0, 1, 1]] )
 
 
@@ -50,7 +44,6 @@ def forward_propagation(input, layers_weight, bias_flag):
     for weights in layers_weight:
         if bias_flag:
             input = np.insert(input, 0, [[1]], axis=1)
-        # print(input)
         net = np.dot(input, weights)
         net = activation_function(net)
         layers_net.append(net)
@@ -98,7 +91,6 @@ def train(x, bias_flag):
     while True:
         MSE = 0
         for i in range(0, len(x)):
-            error = 1
             net = forward_propagation(x[i], layers_weight, bias_flag)
             sigmas = back_propagation(net, layers_weight, y[0, i], bias_flag)
             layers_weight = update_weights(x[i], net, layers_weight, sigmas)
@@ -108,14 +100,15 @@ def train(x, bias_flag):
         MSE = MSE / len(x)
         if MSE <= threshold:
             break
-    # for i in layers_weight:
-    #     print(i)
-    #     print('===========================')
     return layers_weight
 
 
 layers_weight = train(x, bias_flag)
+print(layers_weight)
+print(forward_propagation(x[0], layers_weight, bias_flag)[-1])
+print(forward_propagation(x[1], layers_weight, bias_flag)[-1])
 print(forward_propagation(x[2], layers_weight, bias_flag)[-1])
+print(forward_propagation(x[3], layers_weight, bias_flag)[-1])
 
 plt.scatter([0, 0, 1, 1], [0, 1, 0, 1])
 plt.grid(True)
