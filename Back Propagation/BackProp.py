@@ -1,13 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+
 inputs = 2
 layers_count = 1
 neurons_num = [2]
 output_neurons = 1
 bias_flag = True
 eta = 0.1
-threshold = 0.001
+threshold = 0.01
 x = [
     np.array([[0, 0]]),
     np.array([[1, 1]]),
