@@ -31,11 +31,11 @@ def fill_classes(df):
         train_data = pd.concat([train_data, class_train], ignore_index=True)
         test_data = pd.concat([test_data, class_test], ignore_index=True)
 
-    y_train = train_data['Class']
-    x_train = train_data.drop(['Class'], axis=1, inplace=True)
-    y_test = test_data['Class']
-    x_test = test_data.drop(['Class'], axis=1, inplace=True)
-    return x_train, y_train, x_test, y_test
+    y_train = pd.DataFrame(train_data['Class'])
+    train_data.drop(['Class'], axis=1, inplace=True)
+    y_test = pd.DataFrame(test_data['Class'])
+    test_data.drop(['Class'], axis=1, inplace=True)
+    return train_data, y_train, test_data, y_test
 
 if __name__ == '__main__':
     main()
