@@ -2,36 +2,65 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import PreProcessing
-import tensorflow as tf
+# import tensorflow as tf
 from sklearn.metrics import accuracy_score
+import warnings
+
+# Ignore all warnings
+warnings.filterwarnings("ignore")
 
 
 class MultiNeuralNetwork:
-    def __init__(self, classes_count: int, layers_neurons: list, bias_flag: bool, eta: float, threshold: float,
+    def __init__(self, layers_neurons: list, bias_flag: bool, eta: float, threshold: float,
                  activation_func: object):
-        self.classes_count = classes_count
         self.layers_neurons = layers_neurons
         self.bias_flag = bias_flag
         self.eta = eta
         self.threshold = threshold
         self.activation_func = activation_func
 
-    def preprocess_data(self, x, y):
-        x = x.values.tolist()
-        y = y.values.tolist()
+    def preprocess_input(self, x, y, classes_count):
+        x = np.array(x)
+        y = np.array(y)
         tmp_y = []
         for i in y:
             t = i[0]
-            v = np.zeros(shape=(1, self.classes_count))
+            v = np.zeros(shape=(1, classes_count))
             v[0, int(t)] = 1
             tmp_y.append(v)
         return x, tmp_y
+
+    def preprocess_output(self, y):
+        for i in range(y.shape[1]):
+            if y[0, i] == y.max():
+                return i
+
 
     @staticmethod
     def sigmoid(x):
         return 1 / (1 + np.exp(-x))
 
-    def fill_weights(self, inputs: int):
+    @staticmethod
+    def sigmoid_derivative(x):
+        return x * (1 - x)
+
+    @staticmethod
+    def tanh(x):
+        return np.tanh(x)
+
+    @staticmethod
+    def tanh_derivative(x):
+        return 1 - x ** 2
+
+    @staticmethod
+    def softmax(x):
+        return np.exp(x) / np.sum(np.exp(x))
+
+    @staticmethod
+    def relu(x):
+        return np.maximum(0, x)
+
+    def fill_weights(self, inputs: int, classes_count):
         weights = []
         for layer in range(0, len(self.layers_neurons)):
             m = None
@@ -41,8 +70,7 @@ class MultiNeuralNetwork:
                 m = np.random.rand(self.layers_neurons[layer - 1] + int(self.bias_flag), self.layers_neurons[layer])
             weights.append(m)
         # output layer weights
-        weights.append(np.random.rand(self.layers_neurons[len(self.layers_neurons) - 1] + int(self.bias_flag),
-                                      self.classes_count))
+        weights.append(np.random.rand(self.layers_neurons[-1] + int(self.bias_flag), classes_count))
         return weights
 
     def forward_propagation(self, input, layers_weight):
@@ -51,20 +79,23 @@ class MultiNeuralNetwork:
             if self.bias_flag:
                 input = np.insert(input, 0, [[1]], axis=1)
             net = np.dot(input, weights)
-            net = self.activation_func(net)
+            if weights is layers_weight[-1]:
+                net = self.tanh(net)
+            else:
+                net = self.tanh(net)
             layers_net.append(net)
             input = net
         return layers_net
 
     def back_propagation(self, net: list, layers_weight: list, y):
         sigmas: list = []
-        output_sigma = net[-1] * (1 - net[-1]) * (y - net[-1])
+        output_sigma = self.tanh_derivative(net[-1]) * (y - net[-1])
         sigmas.append(output_sigma)
         for i in range(len(layers_weight) - 2, -1, -1):
             tmp_matrix = np.transpose(layers_weight[i + 1])
             if self.bias_flag:
                 tmp_matrix = tmp_matrix[:, 1:]
-            sigma = np.dot(sigmas[0], tmp_matrix) * net[i] * (1 - net[i])
+            sigma = np.dot(sigmas[0], tmp_matrix) * self.tanh_derivative(net[i])
             sigmas.insert(0, sigma)
         return sigmas
 
@@ -76,56 +107,79 @@ class MultiNeuralNetwork:
                 input = net[i - 1]
             if self.bias_flag:
                 input = np.insert(input, 0, [[1]], axis=1)
-            input = np.transpose(input)
-            tmp = self.eta * sigmas[i] * input
+            # input = np.transpose(input)
+            tmp = self.eta * sigmas[i] * np.transpose(input)
             new_weights = layers_weight[i] + tmp
             new_layers_weight.append(new_weights)
         return new_layers_weight
 
+    # def testing_accuracy(self, activation_function, inputs, outputs):
+    #     inputs, outputs = self.preprocess_input(inputs, outputs, int(outputs.max()+1))
+    #     predictions = []
+    #     predictions = self.accuracy(inputs, activation_function)
+    #     accuracy = accuracy_score(outputs, predictions)
+    #     return accuracy
+    #
+    # def accuracy(self, inputs, activation_function):
+    #
+    #     pred = []
+    #     for i in range(len(inputs)):
+    #         layer_output = self.forward_propagation(inputs[i], activation_function)
+    #         predicted_class = np.argmax(layer_output[-1])
+    #         pred.append(predicted_class)
+    #     return pred
+
+    def accuracy(self, x, y, layers_weights):
+        y = np.array(y)
+        x, tmp_y = self.preprocess_input(x, y, int(y_train.max()+1))
+        true_predictions = 0
+        for i in range(x.shape[0]):
+            x_sample = x[i].reshape(1, x.shape[1])
+            net = self.forward_propagation(x_sample, layers_weights)
+            y_predict = self.preprocess_output(net[-1])
+            if y_predict == y[i, 0]:
+                true_predictions += 1
+        return (true_predictions / y.shape[0]) * 100
+
+
+
     def train(self, x_train, y_train):
-        layers_weight: list = self.fill_weights(x_train.columns.size)
-        x_train, y_train = self.preprocess_data(x_train, y_train)
-        # x_train = x_train.values.tolist()
-        # y_train = y_train.values.tolist()
+        layers_weight: list = self.fill_weights(x_train.columns.size, int(y_train.max())+1)
+        x_train, y_train = self.preprocess_input(x_train, y_train, int(y_train.max()) + 1)
         MSE = 0
-        while True:
-            for i in range(0, len(x_train)):
-                x_row = np.array(x_train[i])
-                x_row = x_row.reshape(1, x_row.shape[0])
+        for e in range(1000):
+            for i in range(0, x_train.shape[0]):
+                x_row = x_train[i].reshape(1, x_train.shape[1])
                 net = self.forward_propagation(x_row, layers_weight)
-                sigmas = self.back_propagation(net, layers_weight, y_train[i])
-                layers_weight = self.update_weights(x_row, net, layers_weight, sigmas)
-                net = self.forward_propagation(x_row, layers_weight)
-                MSE += ((y_train[i] - net[-1]) ** 2)
-                print(y_train[i])
-                print(net[-1])
-                print('=======================')
-            MSE = MSE / len(x_train)
-            print('####################')
+                error = np.abs(y_train[i] - net[-1]).mean()
+                if error >= 0.1:
+                    sigmas = self.back_propagation(net, layers_weight, y_train[i])
+                    layers_weight = self.update_weights(x_row, net, layers_weight, sigmas)
+                MSE += (np.abs(y_train[i] - net[-1])).mean()
+            MSE = MSE / x_train.shape[0]
+            # print(MSE)
             if MSE <= self.threshold:
                 break
         return layers_weight, MSE
 
 
-    # x = pd.DataFrame({
-#     'x1': [0, 1, 1, 0],
-#     'x2': [0, 1, 0, 1]
-# })
-# y = pd.DataFrame({'y': [0, 0, 1, 1]})
+x = pd.DataFrame({
+    'x1': [0, 1, 1, 0],
+    'x2': [0, 1, 0, 1]
+})
+y = pd.DataFrame({'y': [0, 0, 1, 1]})
 
-model = MultiNeuralNetwork(3,
-                           [4,4,4,4,4],
+model = MultiNeuralNetwork([5],
                            True,
-                           2,
+                           0.01,
                            0.01,
                            MultiNeuralNetwork.sigmoid)
 x_train, y_train, x_test, y_test = PreProcessing.main()
-layers_weight, MSE = model.train(x_train, y_train)
-sample = np.array([45504, 793.417, 295.46983055204, 196.31182248937, 0.90835672452768])
-sample = sample.reshape(1,5)
-# print(sample.shape)
-net = model.forward_propagation(sample, layers_weight)
-print(net[-1])
+layers_weights, MSE = model.train(x_train, y_train)
+print('train accuracy : ', model.accuracy(x_train, y_train, layers_weights))
+print('test accuracy : ', model.accuracy(x_test, y_test, layers_weights))
+# print('-----------')
+# print(layers_weights)
 # print(layers_weight)
 # print(MSE)
 
@@ -145,3 +199,16 @@ print(net[-1])
 # plt.plot(axis31, axis32)
 
 # plt.show()
+#
+# print("***********************")
+#
+# x_test = np.array(x_test)
+# y_test = np.array(y_test)
+# for i in range(x_test.shape[0]):
+#     sample = x_test[i].reshape(1, 5)
+#     print(x_test[i])
+#     print(y_test[i])
+#     print(model.forward_propagation(sample, layers_weight)[-1])
+#     print('-----------------------------')
+
+# print("***********************")
