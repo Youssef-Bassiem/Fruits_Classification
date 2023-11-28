@@ -5,7 +5,6 @@ import PreProcessing
 # import tensorflow as tf
 from sklearn.metrics import accuracy_score
 import warnings
-
 # Ignore all warnings
 warnings.filterwarnings("ignore")
 
@@ -18,9 +17,10 @@ class MultiNeuralNetwork:
         self.activ_func = activ_func
         self.activ_func_deriv = activ_func_deriv
 
-    def preprocess_input(self, x, y, classes_count):
+    def preprocess_input(self, x, y):
         x = np.array(x)
         y = np.array(y)
+        classes_count = int(y.max()+1)
         tmp_y = []
         for i in y:
             t = i[0]
@@ -111,38 +111,36 @@ class MultiNeuralNetwork:
             new_layers_weight.append(new_weights)
         return new_layers_weight
 
+    def test(self, data, layers_weights):
+        data = np.array(data)
+        predictions = []
+        for i in range(data.shape[0]):
+            sample = data[i].reshape(1, data.shape[1])
+            net = self.forward_propagation(sample, layers_weights)
+            predictions.append(self.preprocess_output(net[-1]))
+        return predictions
+
     def accuracy(self, x, y, layers_weights):
         y = np.array(y)
-        x, tmp_y = self.preprocess_input(x, y, int(y_train.max() + 1))
+        x = np.array(x)
         true_predictions = 0
-        for i in range(x.shape[0]):
-            x_sample = x[i].reshape(1, x.shape[1])
-            net = self.forward_propagation(x_sample, layers_weights)
-            y_predict = self.preprocess_output(net[-1])
-            print(y[i, 0])
-            print(net[-1])
-            print('----------------')
-            if y_predict == y[i, 0]:
+        predictions = self.test(x, layers_weights)
+        for i in range(len(predictions)):
+            if predictions[i] == y[i, 0]:
                 true_predictions += 1
         return (true_predictions / y.shape[0]) * 100
 
     def train(self, x_train, y_train):
         layers_weight: list = self.fill_weights(x_train.columns.size, int(y_train.max()) + 1)
-        x_train, y_train = self.preprocess_input(x_train, y_train, int(y_train.max()) + 1)
-        MSE = 0
-        for i in range(1000):
+        x_train, y_train = self.preprocess_input(x_train, y_train)
+        for epoch in range(1000):
             for i in range(0, x_train.shape[0]):
                 x_row = x_train[i].reshape(1, x_train.shape[1])
                 net = self.forward_propagation(x_row, layers_weight)
                 # error = np.abs(y_train[i] - net[-1]).mean()
                 sigmas = self.back_propagation(net, layers_weight, y_train[i])
                 layers_weight = self.update_weights(x_row, net, layers_weight, sigmas)
-                MSE += (np.abs(y_train[i] - net[-1])).mean() ** 2
-            MSE = MSE / x_train.shape[0]
-            # print(MSE)
-            # if MSE <= 0.01:
-            #     break
-        return layers_weight, MSE
+        return layers_weight
 
 
 x = pd.DataFrame({
@@ -151,15 +149,14 @@ x = pd.DataFrame({
 })
 y = pd.DataFrame({'y': [0, 0, 1, 1]})
 
-model = MultiNeuralNetwork([5],
+model = MultiNeuralNetwork([3],
                            True,
                            0.1,
                            MultiNeuralNetwork.sigmoid,
                            MultiNeuralNetwork.sigmoid_derivative
                            )
 x_train, y_train, x_test, y_test = PreProcessing.main()
-layers_weights, MSE = model.train(x_train, y_train)
-
+layers_weights = model.train(x_train, y_train)
 
 # print('train accuracy : ', model.accuracy(x_train, y_train, layers_weights))
 print('test accuracy : ', model.accuracy(x_test, y_test, layers_weights))
