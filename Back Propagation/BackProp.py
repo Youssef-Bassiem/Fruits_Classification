@@ -4,7 +4,9 @@ import pandas as pd
 import PreProcessing
 # import tensorflow as tf
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix, classification_report
 import warnings
+
 # Ignore all warnings
 warnings.filterwarnings("ignore")
 
@@ -20,7 +22,7 @@ class MultiNeuralNetwork:
     def preprocess_input(self, x, y):
         x = np.array(x)
         y = np.array(y)
-        classes_count = int(y.max()+1)
+        classes_count = int(y.max() + 1)
         tmp_y = []
         for i in y:
             t = i[0]
@@ -130,10 +132,57 @@ class MultiNeuralNetwork:
                 true_predictions += 1
         return (true_predictions / y.shape[0]) * 100
 
+    def confusion_matrix(self, y_test, y_pred):
+        t11 = 0
+        t12 = 0
+        t13 = 0
+        t21 = 0
+        t22 = 0
+        t23 = 0
+        t31 = 0
+        t32 = 0
+        t33 = 0
+
+        for a, p in zip(y_test['Class'], y_pred):
+            a = int(a)
+            p = int(p)
+            if a == 0 and p == 0:
+                t11 += 1
+            elif a == 0 and p == 1:
+                t12 += 1
+            elif a == 0 and p == 2:
+                t13 += 1
+            elif a == 1 and p == 0:
+                t21 += 1
+            elif a == 1 and p == 1:
+                t22 += 1
+            elif a == 1 and p == 2:
+                t23 += 1
+            elif a == 2 and p == 0:
+                t31 += 1
+            elif a == 2 and p == 1:
+                t32 += 1
+            elif a == 2 and p == 2:
+                t33 += 1
+            # Create the confusion matrix
+        matrix = [
+            [t11, t12, t13],
+            [t21, t22, t23],
+            [t31, t32, t33]
+        ]
+
+        # Display the confusion matrix
+        print("Confusion Matrix: ")
+        # print(matrix)
+        for row in matrix:
+            for value in row:
+                print(f"{value:2}", end=" ")  # Adjust the formatting as needed
+            print()
+
     def train(self, x_train, y_train):
         layers_weight: list = self.fill_weights(x_train.columns.size, int(y_train.max()) + 1)
         x_train, y_train = self.preprocess_input(x_train, y_train)
-        for epoch in range(1000):
+        for epoch in range(500):
             for i in range(0, x_train.shape[0]):
                 x_row = x_train[i].reshape(1, x_train.shape[1])
                 net = self.forward_propagation(x_row, layers_weight)
@@ -157,36 +206,15 @@ model = MultiNeuralNetwork([3],
                            )
 x_train, y_train, x_test, y_test = PreProcessing.main()
 layers_weights = model.train(x_train, y_train)
+y_pred = model.test(x_test, layers_weights)
 
-# print('train accuracy : ', model.accuracy(x_train, y_train, layers_weights))
+print('train accuracy : ', model.accuracy(x_train, y_train, layers_weights))
 print('test accuracy : ', model.accuracy(x_test, y_test, layers_weights))
-# print('-----------')
-# print(layers_weights)
-# print(layers_weight)
-# print(MSE)
+print("*****************************************************************************")
+print("-------confusion matrix-------")
+print(confusion_matrix(y_test, y_pred))
+print("++++++++++++++++++++++++++++++++")
+model.confusion_matrix(y_test, y_pred)
+print("*****************************************************************************")
 
-# plt.scatter([0, 0, 1, 1], [0, 1, 0, 1])
-# plt.grid(True)
-#
-# axis11 = np.arange(0, 1.1, 0.1)
-# axis12 = (axis11 * layers_weights[0][1, 0] + layers_weights[0][0, 0]) / (-1 * layers_weights[0][2, 0])
-# plt.plot(axis11, axis12)
-#
-# axis21 = np.arange(0, 1.1, 0.1)
-# axis22 = (axis21 * layers_weights[0][1, 1] + layers_weights[0][0, 1]) / (-1 * layers_weights[0][2, 1])
-# plt.plot(axis21, axis22)
-#
-# plt.show()
-#
-# print("***********************")
-#
-# x_test = np.array(x_test)
-# y_test = np.array(y_test)
-# for i in range(x_test.shape[0]):
-#     sample = x_test[i].reshape(1, 5)
-#     print(x_test[i])
-#     print(y_test[i])
-#     print(model.forward_propagation(sample, layers_weight)[-1])
-#     print('-----------------------------')
 
-# print("***********************")
