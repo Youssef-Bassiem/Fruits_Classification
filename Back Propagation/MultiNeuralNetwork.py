@@ -5,17 +5,15 @@ import PreProcessing
 # import tensorflow as tf
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix, classification_report
-import warnings
-
-# Ignore all warnings
-warnings.filterwarnings("ignore")
+import seaborn as sns
 
 
 class MultiNeuralNetwork:
-    def __init__(self, layers_neurons: list, bias_flag: bool, eta: float, activ_func, activ_func_deriv):
+    def __init__(self, layers_neurons: list, bias_flag: bool, eta: float, epoch: int, activ_func, activ_func_deriv):
         self.layers_neurons = layers_neurons
         self.bias_flag = bias_flag
         self.eta = eta
+        self.epoch = epoch
         self.activ_func = activ_func
         self.activ_func_deriv = activ_func_deriv
 
@@ -172,17 +170,17 @@ class MultiNeuralNetwork:
         ]
 
         # Display the confusion matrix
-        print("Confusion Matrix: ")
         # print(matrix)
         for row in matrix:
             for value in row:
                 print(f"{value:2}", end=" ")  # Adjust the formatting as needed
             print()
+        return matrix
 
     def train(self, x_train, y_train):
         layers_weight: list = self.fill_weights(x_train.columns.size, int(y_train.max()) + 1)
         x_train, y_train = self.preprocess_input(x_train, y_train)
-        for epoch in range(500):
+        for k in range(self.epoch):
             for i in range(0, x_train.shape[0]):
                 x_row = x_train[i].reshape(1, x_train.shape[1])
                 net = self.forward_propagation(x_row, layers_weight)
@@ -191,30 +189,15 @@ class MultiNeuralNetwork:
                 layers_weight = self.update_weights(x_row, net, layers_weight, sigmas)
         return layers_weight
 
+    def plot_confusion_matrix(self, conf_matrix, class_names):
+        plt.figure(figsize=(8, 6))
+        sns.set(font_scale=1.2)
+        sns.heatmap(conf_matrix, annot=True, fmt="d",
+                    xticklabels=class_names, yticklabels=class_names)
 
-x = pd.DataFrame({
-    'x1': [0, 1, 1, 0],
-    'x2': [0, 1, 0, 1]
-})
-y = pd.DataFrame({'y': [0, 0, 1, 1]})
-
-model = MultiNeuralNetwork([3],
-                           True,
-                           0.1,
-                           MultiNeuralNetwork.sigmoid,
-                           MultiNeuralNetwork.sigmoid_derivative
-                           )
-x_train, y_train, x_test, y_test = PreProcessing.main()
-layers_weights = model.train(x_train, y_train)
-y_pred = model.test(x_test, layers_weights)
-
-print('train accuracy : ', model.accuracy(x_train, y_train, layers_weights))
-print('test accuracy : ', model.accuracy(x_test, y_test, layers_weights))
-print("*****************************************************************************")
-print("-------confusion matrix-------")
-print(confusion_matrix(y_test, y_pred))
-print("++++++++++++++++++++++++++++++++")
-model.confusion_matrix(y_test, y_pred)
-print("*****************************************************************************")
+        plt.title('Confusion Matrix')
+        plt.xlabel('Predicted label')
+        plt.ylabel('True label')
+        plt.show()
 
 
