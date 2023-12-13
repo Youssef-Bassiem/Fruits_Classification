@@ -6,7 +6,7 @@ from random import shuffle
 
 
 def resize_img(img):
-    img = cv2.resize(img, (200, 200))
+    img = cv2.resize(img, (150, 150))
     return img
 
 
@@ -24,7 +24,7 @@ def create_label(image_class):
 
 
 data = []
-path = 'dataset/train'
+path = '../../Fruits_DataSet/train'
 for i in os.listdir(path):
     for j in os.listdir(path + '/' + i):
         if i in ['1', '2', '3', '4', '5']:
@@ -48,7 +48,7 @@ images = images[indices]
 labels = labels[indices]
 
 # Save the arrays
-np.save('dataset/train_images.npy', images)
-np.save('dataset/train_labels.npy', labels)
+np.save('../../Fruits_DataSet/train_images.npy', images)
+np.save('../../Fruits_DataSet/train_labels.npy', labels)
 
 print('done')

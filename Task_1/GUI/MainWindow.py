@@ -17,7 +17,7 @@ class MainWindow(Ui_MainWindow):
 
         self.comboBox.addItems(['Area', 'Perimeter', 'MajorAxisLength', 'MinorAxisLength', 'roundnes'])
         self.comboBox_2.addItems(['Area', 'Perimeter', 'MajorAxisLength', 'MinorAxisLength', 'roundnes'])
-        self.learn_btn.clicked.connect(lambda: self.deep_learning())
+        self.learn_btn.clicked.connect(lambda: self.train_model())
 
         # adding Graph
         self.graph = FigureCanvasQTAgg(Figure(figsize=(1, 1), dpi=100))
@@ -31,6 +31,12 @@ class MainWindow(Ui_MainWindow):
         self.epochs_spinBox.setValue(150)
         self.learningRate_spingBox.setValue(0.0001)
         self.bias_checkBox.setChecked(True)
+
+    def train_model(self):
+        if self.perceptron_btn.isChecked():
+            self.deep_learning()
+        else:
+            self.deep_learning_2()
 
     def deep_learning(self):
         # 0 -> Bombay, 1 -> Sira, 2 -> Cali
