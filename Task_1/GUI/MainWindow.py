@@ -57,6 +57,7 @@ class MainWindow(Ui_MainWindow):
 
         self.graph_axis.clear()
         self.graph.draw()
+        # print(data2[self.comboBox.currentText()].tolist())
         self.graph_axis.scatter(data1[self.comboBox.currentText()].tolist(),
                                 data1[self.comboBox_2.currentText()].tolist())
         self.graph_axis.scatter(data2[self.comboBox.currentText()].tolist(),
@@ -66,6 +67,7 @@ class MainWindow(Ui_MainWindow):
                         max(data1[self.comboBox_2.currentText()].max(), data2[self.comboBox_2.currentText()].max()),
                         10)
         x = ((weights[2] * y) + weights[0]) / (-1 * weights[1])
+
         self.graph_axis.plot(x, y, color='red')
         self.graph_axis.grid(True)
         self.graph.draw()
@@ -81,7 +83,6 @@ class MainWindow(Ui_MainWindow):
         elif self.classes_comboBox.currentText() == 'CALI & SIRA':
             main_adaline.C1 = 2
             main_adaline.C2 = 1
-        # print(self.classes_comboBox.currentText())
 
         main_adaline.flagOfBias = False
         if self.bias_checkBox.isChecked():
@@ -104,6 +105,8 @@ class MainWindow(Ui_MainWindow):
                         max(data1[self.comboBox_2.currentText()].max(), data2[self.comboBox_2.currentText()].max()),
                         10)
         x = ((weights[2] * y) + weights[0]) / (-1 * weights[1])
+        # x += 70000
+        # y += 800
         self.graph_axis.plot(x, y, color='red')
         self.graph_axis.grid(True)
         self.graph.draw()
