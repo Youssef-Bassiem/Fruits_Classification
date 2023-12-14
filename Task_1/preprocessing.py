@@ -37,25 +37,25 @@ def pre(c1, c2, samples, train_samples, features):
     samples_of_c2, test_of_c2 = split_data(c2, samples, features, train_samples, df)
 
     samples_of_c1[samples_of_c1.columns[0]] = np.ones(samples_of_c1.shape[0])
-    # test_of_c1[test_of_c1.columns[0]] = np.ones(test_of_c1.shape[0])
+    test_of_c1[test_of_c1.columns[0]] = np.ones(test_of_c1.shape[0])
 
     samples_of_c2[samples_of_c2.columns[0]] = np.ones(samples_of_c2.shape[0]) * -1
-    # test_of_c2[test_of_c2.columns[0]] = np.ones(test_of_c2.shape[0]) * -1
+    test_of_c2[test_of_c2.columns[0]] = np.ones(test_of_c2.shape[0]) * -1
 
     data = (pd.concat([samples_of_c1, samples_of_c2]).
             sample(frac=1, random_state=42).reset_index(drop=True))
 
     for feature in features:
         data[feature].fillna(value=data[feature].median(), inplace=True)
-        # test_of_c1[feature].fillna(value=test_of_c1[feature].median(), inplace=True)
-        # test_of_c2[feature].fillna(value=test_of_c2[feature].median(), inplace=True)
+        test_of_c1[feature].fillna(value=test_of_c1[feature].median(), inplace=True)
+        test_of_c2[feature].fillna(value=test_of_c2[feature].median(), inplace=True)
     data.iloc[:, 1:len(features)] = normalize(data.iloc[:, 1:len(features)])
-    # test_of_c1.drop(['Class'], axis=1, inplace=True)
-    # test_of_c2.drop(['Class'], axis=1, inplace=True)
-    # test_of_c1 = normalize(test_of_c1)
-    # test_of_c2 = normalize(test_of_c2)
-    # test_of_c1.insert(0, 'Class', np.ones(test_of_c1.shape[0]))
-    # test_of_c2.insert(0, 'Class', np.ones(test_of_c2.shape[0])*-1)
+    test_of_c1.drop(['Class'], axis=1, inplace=True)
+    test_of_c2.drop(['Class'], axis=1, inplace=True)
+    test_of_c1 = normalize(test_of_c1)
+    test_of_c2 = normalize(test_of_c2)
+    test_of_c1.insert(0, 'Class', np.ones(test_of_c1.shape[0]))
+    test_of_c2.insert(0, 'Class', np.ones(test_of_c2.shape[0])*-1)
     dd1 = pd.DataFrame()
     dd2 = pd.DataFrame()
     for i in range(data.shape[0]):
@@ -63,4 +63,4 @@ def pre(c1, c2, samples, train_samples, features):
             dd1 = dd1.append(data.iloc[i, 1:], ignore_index=True)
         else:
             dd2 = dd2.append(data.iloc[i, 1:], ignore_index=True)
-    return dd1, dd2, data
+    return dd1, dd2, data, samples_of_c1, samples_of_c2, test_of_c1, test_of_c2

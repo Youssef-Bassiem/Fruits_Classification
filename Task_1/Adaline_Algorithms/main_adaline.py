@@ -48,7 +48,7 @@ def main():
         weights[i] = np.random.rand()
     xi = np.ones(len(features))
     xi[0] = 1 if flagOfBias else 0
-    dd1, dd2, data = pre(C1, C2, samples, trainSamples, features)
+    dd1, dd2, data, _, _, _, _ = pre(C1, C2, samples, trainSamples, features)
     weights = train_model(weights, data, xi)
     return dd1, dd2, weights
 
