@@ -7,7 +7,7 @@ import random
 
 
 def resize_img(img):
-    img = cv2.resize(img, (150, 150))
+    img = cv2.resize(img, (170, 170))
     return img
 
 
@@ -57,7 +57,9 @@ for i in os.listdir(path):
             img = cv2.imread(path + '/' + i + '/' + j, cv2.IMREAD_COLOR)
             img = resize_img(img)
             data.append((img, create_label(i)))
+
             data.append((cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE), create_label(i)))
+
             data.append((cv2.flip(img, -1), create_label(i)))
             data.append((cv2.flip(img, 0), create_label(i)))
             data.append((cv2.flip(img, 1), create_label(i)))
