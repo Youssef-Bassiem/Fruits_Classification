@@ -7,7 +7,7 @@ import random
 
 
 def resize_img(img):
-    img = cv2.resize(img, (170, 170))
+    img = cv2.resize(img, (200, 200))
     return img
 
 
@@ -60,16 +60,16 @@ for i in os.listdir(path):
 
             data.append((cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE), create_label(i)))
 
-            data.append((cv2.flip(img, -1), create_label(i)))
-            data.append((cv2.flip(img, 0), create_label(i)))
-            data.append((cv2.flip(img, 1), create_label(i)))
+            # data.append((cv2.flip(img, -1), create_label(i)))
+            # data.append((cv2.flip(img, 0), create_label(i)))
+            # data.append((cv2.flip(img, 1), create_label(i)))
 
-            if random.random() < augmentation_probability:
-                zoomed_img = random_zoom_and_crop(img)
-                data.append((zoomed_img, create_label(i)))
+            # if random.random() < augmentation_probability:
+            zoomed_img = random_zoom_and_crop(img)
+            data.append((zoomed_img, create_label(i)))
 
-                bright_contrast_img = random_brightness_contrast(img)
-                data.append((bright_contrast_img, create_label(i)))
+            bright_contrast_img = random_brightness_contrast(img)
+            data.append((bright_contrast_img, create_label(i)))
 
 # Convert the list of tuples into separate arrays
 images, labels = zip(*data)

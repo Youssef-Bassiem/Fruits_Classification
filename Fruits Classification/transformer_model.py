@@ -21,7 +21,7 @@ y_train = np.load('../../Fruits_DataSet/train_labels.npy')
 
 print(x_train[0].shape)
 print(y_train.shape)
-IMG_SIZE = 170
+IMG_SIZE = 200
 num_classes = 5
 
 
@@ -33,7 +33,7 @@ def scheduler(epoch, lr):
         return lr * tf.math.exp(-0.1)
 
 
-def train_model(model, x_train, y_train, epochs=10, validation_split=0.2):
+def train_model(model, x_train, y_train, epochs=5, validation_split=0.2):
     lr_scheduler = LearningRateScheduler(scheduler)
 
     # Early stopping callback
@@ -64,7 +64,7 @@ def create_transformer_cnn_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classe
     # Additional CNN layers
     model.add(Conv2D(512, (3, 3), activation='relu'))
     # model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(256, (3, 3), activation='relu'))
+    model.add(Conv2D(512, (3, 3), activation='relu'))
     model.add(MaxPooling2D((2, 2)))
     # model.add(Conv2D(64, (3, 3), activation='relu'))
     # model.add(MaxPooling2D((2, 2)))
@@ -75,9 +75,9 @@ def create_transformer_cnn_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classe
     model.add(Flatten())
 
     # Fully connected layers (you can customize this part)
-    model.add(Dense(512, activation='relu'))
+    model.add(Dense(1024, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(256, activation='relu'))
+    model.add(Dense(512, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation='softmax'))
 
