@@ -7,7 +7,7 @@ import random
 
 
 def resize_img(img):
-    img = cv2.resize(img, (200, 200))
+    img = cv2.resize(img, (224, 224))
     return img
 
 
@@ -50,7 +50,8 @@ def random_brightness_contrast(img):
 data = []
 path = '../../Fruits_DataSet/train'
 
-augmentation_probability = 0.5
+augmentation_probability_flip = 0.2
+augmentation_probability_zoom = 0.3
 for i in os.listdir(path):
     for j in os.listdir(path + '/' + i):
         if i in ['1', '2', '3', '4', '5']:
@@ -59,14 +60,14 @@ for i in os.listdir(path):
             data.append((img, create_label(i)))
 
             data.append((cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE), create_label(i)))
+            if random.random() < augmentation_probability_flip:
+                data.append((cv2.flip(img, -1), create_label(i)))
+                data.append((cv2.flip(img, 0), create_label(i)))
+                data.append((cv2.flip(img, 1), create_label(i)))
 
-            # data.append((cv2.flip(img, -1), create_label(i)))
-            # data.append((cv2.flip(img, 0), create_label(i)))
-            # data.append((cv2.flip(img, 1), create_label(i)))
-
-            # if random.random() < augmentation_probability:
-            zoomed_img = random_zoom_and_crop(img)
-            data.append((zoomed_img, create_label(i)))
+            if random.random() < augmentation_probability_zoom:
+                zoomed_img = random_zoom_and_crop(img)
+                data.append((zoomed_img, create_label(i)))
 
             bright_contrast_img = random_brightness_contrast(img)
             data.append((bright_contrast_img, create_label(i)))
