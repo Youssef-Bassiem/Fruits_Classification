@@ -6,12 +6,13 @@ from keras.layers import Input
 import numpy as np
 import cv2
 
-x_train = np.load('../../dataset/train_images.npy')
-y_train = np.load('../../dataset/train_labels.npy')
+x_train = np.load('../../Fruits_DataSet/train_images.npy')
+y_train = np.load('../../Fruits_DataSet/train_labels.npy')
 
 print(x_train[0].shape)
 print(y_train.shape)
-IMG_SIZE = 100
+IMG_SIZE = 224
+
 
 # def cnn_model():
 #     model = Sequential()
@@ -58,7 +59,7 @@ def inception_model():
     max_pool = MaxPooling2D((3, 3), strides=(1, 1), padding='same')(input_img)
     max_pool = Conv2D(10, (1, 1), activation='relu', padding='same')(max_pool)
 
-    concatenation = tf.keras.layers.concatenate([conv1,conv2, conv3, max_pool], axis=-1)
+    concatenation = tf.keras.layers.concatenate([conv1, conv2, conv3, max_pool], axis=-1)
     conv4 = Conv2D(10, (1, 1), activation='relu', padding='same')(concatenation)
     conv4 = Conv2D(10, (3, 3), activation='relu', padding='same')(conv4)
 
@@ -84,7 +85,7 @@ def inception_model():
     # else:
     early_stopping = EarlyStopping(patience=5, verbose=1, monitor='val_loss', mode='min', restore_best_weights=True)
     model.fit(x_train, y_train, epochs=5, validation_split=0.2, callbacks=[early_stopping])
-    model.save('../../fruits.h5')
+    model.save('../../Fruits_DataSet/fruits.h5')
     # return model
 
 

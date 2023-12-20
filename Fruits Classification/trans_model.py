@@ -9,26 +9,22 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.utils import to_categorical
 from keras.applications import EfficientNetB0
-from keras.applications import VGG16
 from tensorflow.keras.callbacks import EarlyStopping, LearningRateScheduler, ModelCheckpoint
-import warnings
+
 from keras.regularizers import l2
 from keras.layers import GlobalAveragePooling2D
-
-# Filter specific warning
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="tensorflow")
+from keras.layers import MultiHeadAttention, LayerNormalization
+from keras.layers import Concatenate
+from keras.layers import Attention
 
 x_train = np.load('../../Fruits_DataSet/train_images.npy')
 y_train = np.load('../../Fruits_DataSet/train_labels.npy')
 
-print(x_train[0].shape)
-print(y_train.shape)
 IMG_SIZE = 224
 num_classes = 5
 
 
-def train_model(model, x_train, y_train, epochs=25, validation_split=0.3):
-
+def train_model(model, x_train, y_train, epochs=5, validation_split=0.3):
     # Early stopping callback
     early_stopping = EarlyStopping(patience=5, verbose=1, monitor='val_loss', mode='min', restore_best_weights=True)
 
@@ -37,7 +33,7 @@ def train_model(model, x_train, y_train, epochs=25, validation_split=0.3):
     return model
 
 
-def create_transformer_cnn_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classes=num_classes):
+def create_transformer_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classes=num_classes):
     # Create a base transformer-based model
     transformer_model = EfficientNetB0(weights='imagenet', include_top=False, input_shape=input_shape)
 
@@ -52,20 +48,23 @@ def create_transformer_cnn_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classe
 
     # Create a sequential model with the transformer base
     model = Sequential()
-    model.add(transformer_model)
+    # model.add(transformer_model)
 
-    # # Additional CNN layers
-    model.add(Conv2D(512, (1, 1), padding='same', activation='relu'))
-    model.add(Conv2D(256, (1, 1), padding='same', activation='relu'))
-    model.add(Conv2D(128, (3, 3), padding='same', activation='relu'))
-    model.add(Conv2D(64, (1, 1), padding='same', activation='relu'))
-    model.add(Conv2D(32, (5, 5), padding='same', activation='relu'))
-    model.add(MaxPooling2D((3, 3), strides=(1, 1), padding='same'))
-    model.add(Conv2D(16, (1, 1), padding='same', activation='relu'))
+    # transformer_model.summary()
 
-    # Flatten the output for Dense layers
-    # model.add(Flatten())
+    model.add(Conv2D(8, (3, 3), activation='relu', padding='same', input_shape=input_shape))
+
+    attention_output = MultiHeadAttention(num_heads=5, key_dim=512)(model.output)
+
+    # LayerNormalization
+    attention_output = LayerNormalization(epsilon=1e-6)(attention_output)
+
+    # Connect the attention output to the transformer model
+    model.add(attention_output)
+
+    # Global Average Pooling
     model.add(GlobalAveragePooling2D())
+
     # Fully connected layers (you can customize this part)
     model.add(Dense(512, activation='relu', kernel_regularizer=l2(0.01)))
     model.add(Dropout(0.5))
@@ -78,6 +77,6 @@ def create_transformer_cnn_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classe
     return model
 
 
-transformer_cnn_model = create_transformer_cnn_model()
-trained_model_transformer = train_model(transformer_cnn_model, x_train, y_train)
-trained_model_transformer.save('../../Fruits_DataSet/transformer_cnn_model.h5')
+transformer_model = create_transformer_model()
+trained_transformer_model = train_model(transformer_model, x_train, y_train)
+trained_transformer_model.save('../../Fruits_DataSet/transformer_model_true.h5')

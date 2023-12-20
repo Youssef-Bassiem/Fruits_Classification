@@ -8,14 +8,15 @@ import cv2
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.utils import to_categorical
-from keras.applications import EfficientNetB0
+from keras.regularizers import l2
+from keras.layers import GlobalAveragePooling2D
 
 x_train = np.load('../../Fruits_DataSet/train_images.npy')
 y_train = np.load('../../Fruits_DataSet/train_labels.npy')
 
 print(x_train[0].shape)
 print(y_train.shape)
-IMG_SIZE = 170
+IMG_SIZE = 224
 num_classes = 5
 
 
@@ -54,10 +55,10 @@ def create_vgg16_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classes=num_clas
     model.add(Flatten())
 
     # Fully connected layers
-    model.add(Dense(512, activation='relu'))
+    model.add(Dense(512, activation='relu', kernel_regularizer=l2(0.01)))
     model.add(Dropout(0.5))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dropout(0.2))
     model.add(Dense(num_classes, activation='softmax'))
 
     # Compile the model
@@ -66,7 +67,7 @@ def create_vgg16_model(input_shape=(IMG_SIZE, IMG_SIZE, 3), num_classes=num_clas
     return model
 
 
-def train_vgg16_model(model, x_train, y_train, epochs=5, validation_split=0.2):
+def train_vgg16_model(model, x_train, y_train, epochs=25, validation_split=0.3):
     # Assuming that your labels are in integer format, convert them to one-hot encoding
     # y_train = to_categorical(y_train)
 
@@ -81,4 +82,4 @@ def train_vgg16_model(model, x_train, y_train, epochs=5, validation_split=0.2):
 
 vgg16_model = create_vgg16_model()
 trained_model = train_vgg16_model(vgg16_model, x_train, y_train)
-trained_model.save('vgg16_model.h5')
+trained_model.save('../../Fruits_DataSet/vgg16_model.h5')

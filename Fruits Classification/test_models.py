@@ -19,7 +19,7 @@ def load_test_data():
 
 
 test_data = load_test_data()
-model = tf.keras.models.load_model('../../Fruits_DataSet/transformer_cnn_model.h5')
+model = tf.keras.models.load_model('../../Fruits_DataSet/old/94/fine_tuned_transformer_cnn_model.h5')
 labels = ['apple', 'moz', '3nab', 'mango', 'farawla']
 for i in range(len(test_data)):
     x = model.predict(test_data[i][0].reshape(1, 224, 224, 3))
